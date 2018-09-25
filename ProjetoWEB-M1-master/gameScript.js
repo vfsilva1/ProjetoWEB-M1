@@ -12,12 +12,13 @@ $(function(){
         img : new Image(),
         width : 150,
         height : 150,
-        x : 50,
+        x : 1,
         y : 0,
         speedX : 0,
         speedY : 0,
         jumping : true
     };
+    megaman.img.src = "sprites-megaman-x.png";
     
     //coordenadas da sprite
     var srcX;
@@ -31,7 +32,6 @@ $(function(){
     var frameHeight = 172;
     var currentFrame = 0;
     
-    var cont = 1;
     function updateFrame() {
         currentFrame = ++currentFrame % cols;
         srcX = currentFrame * frameWidth;
@@ -42,10 +42,29 @@ $(function(){
     function drawRunning(){
         updateFrame();
         ctx.drawImage(correndo, srcX, srcY, frameWidth, frameHeight, megaman.x, megaman.y, megaman.width, megaman.height);
-        console.log(cont);
     }
     
-    megaman.img.src = "sprites-megaman-x.png";
+    var fps, fpsInterval, startTime, now, then, elapsed;
+    function startAnimating(fps) {
+        fpsInterval = 1000 / fps;
+        then = Date.now();
+        startTime = then;
+        animate();
+    }
+    
+    function animate(){
+        requestAnimationFrame(animate);
+        
+        now = Date.now();
+        elapsed = now - then;
+        console.log("alo");
+        if(elapsed > fpsInterval) {
+            then = now - (elapsed % fpsInterval);
+            //desenhar    
+        }
+    }
+    
+    
     
     var controller = {
         up : false,
@@ -86,10 +105,10 @@ $(function(){
             
         }
         
-        if(controller.left)
+        if(controller.left && megaman.x < 1000)
             megaman.speedX -= 0.5;
         
-        if(controller.right)
+        if(controller.right && megaman.x > 0)
             megaman.speedX += 0.5;
         
         megaman.speedY += 1.5;
@@ -98,31 +117,39 @@ $(function(){
         megaman.speedY *= 0.9;
         megaman.speedX *= 0.9;
         
-        if(megaman.y > 450) {
+        if(megaman.y > 608) {
             megaman.jumping = false;
-            megaman.y = 450;
+            megaman.y = 608;
             megaman.speedY = 0;
         }
     }
-    
+    var x = 0, x2 = 0;
+    var recX = 1100, recY = 688;
     //desenhar elementos do jogo na tela
     function render() {
-        //pinta tela de branco
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, 1000, 800);
+        //pinta tela
+        ctx.drawImage(cenario, 0, 0, 1000, 800, x, 0, 1000, 800);
+        ctx.drawImage(cenario, 0, 0, 1000, 800, x + 1000, 0, 1000, 800);
+        ctx.drawImage(cenario, 0, 0, 1000, 800, x2, 0, 1000, 800);
+        ctx.drawImage(cenario, 0, 0, 1000, 800, x2 + 1000, 0, 1000, 800);
+        x --;
+        x2--;
+        if(x + cenario.width <= 0)
+            x = 0;
+        if(x2 + cenario.width <= 0)
+            x2 = 0;
         
+        ctx.fillRect(recX, recY, 50, 50);
+        recX -= 4;
         //desenha o personagem se estiver pulando ou parado
         if(megaman.jumping == true)
             ctx.drawImage(megaman.img, 320, 220, 90, 190, megaman.x, megaman.y, 80, 170);
         else
-            drawRunning();
-
-        //desenha linha
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 580, 1000, 7);
+            ctx.drawImage(megaman.img, 550, 70, 140, 130, megaman.x, megaman.y, 130, 130);
+        
+        
         
     }
-    
     //chamando para rodar infinitamente
-   loop();
+    loop();
 });

@@ -6,8 +6,7 @@ $(function(){
     var correndo = new Image();
     correndo.src = "megamanCorrendo.png";
     
-    
-    //criando objeto retangulo
+    //criando objeto megaman
     var megaman = {
         img : new Image(),
         width : 150,
@@ -16,7 +15,8 @@ $(function(){
         y : 0,
         speedX : 0,
         speedY : 0,
-        jumping : true
+        jumping : true,
+        hp : 3
     };
     megaman.img.src = "sprites-megaman-x.png";
     
@@ -57,10 +57,10 @@ $(function(){
         
         now = Date.now();
         elapsed = now - then;
-        console.log("alo");
         if(elapsed > fpsInterval) {
             then = now - (elapsed % fpsInterval);
-            //desenhar    
+            //desenhar   
+            drawRunning();
         }
     }
     
@@ -124,10 +124,10 @@ $(function(){
         }
     }
     var x = 0, x2 = 0;
-    var recX = 1100, recY = 688;
+    var recX = 500, recY = 688;
     //desenhar elementos do jogo na tela
     function render() {
-        //pinta tela
+        //cenario se mexendo
         ctx.drawImage(cenario, 0, 0, 1000, 800, x, 0, 1000, 800);
         ctx.drawImage(cenario, 0, 0, 1000, 800, x + 1000, 0, 1000, 800);
         ctx.drawImage(cenario, 0, 0, 1000, 800, x2, 0, 1000, 800);
@@ -140,16 +140,17 @@ $(function(){
             x2 = 0;
         
         ctx.fillRect(recX, recY, 50, 50);
-        recX -= 4;
+        recX -= 2;
         //desenha o personagem se estiver pulando ou parado
         if(megaman.jumping == true)
             ctx.drawImage(megaman.img, 320, 220, 90, 190, megaman.x, megaman.y, 80, 170);
         else
             ctx.drawImage(megaman.img, 550, 70, 140, 130, megaman.x, megaman.y, 130, 130);
         
-        
+        if(recX < megaman.x + 130)
+            megaman.speedX = 0;
         
     }
     //chamando para rodar infinitamente
-    loop();
+    window.requestAnimationFrame(loop);
 });

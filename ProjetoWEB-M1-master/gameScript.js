@@ -1,25 +1,51 @@
 $(function(){
     var cnv = $('canvas')[0];
     var ctx = cnv.getContext('2d');
-    var character = new Image();
-    character.src = "sprites-megaman-x.png";
     var cenario = new Image();
     cenario.src = "cenario.png";
     var correndo = new Image();
-    correndo.src = "runningMegaman.png";
-    var cont = 0;
+    correndo.src = "megamanCorrendo.png";
     
     
     //criando objeto retangulo
-    var rectangle = {
-        width : 50,
-        height : 50,
+    var megaman = {
+        img : new Image(),
+        width : 150,
+        height : 150,
         x : 50,
         y : 0,
         speedX : 0,
         speedY : 0,
         jumping : true
     };
+    
+    //coordenadas da sprite
+    var srcX;
+    var srcY;
+    //tamanho da sprite
+    var spriteWidth = 1200;
+    var spriteHeight = 172;
+    
+    var cols = 6;
+    var frameWidth = spriteWidth / cols;
+    var frameHeight = 172;
+    var currentFrame = 0;
+    
+    var cont = 1;
+    function updateFrame() {
+        currentFrame = ++currentFrame % cols;
+        srcX = currentFrame * frameWidth;
+        srcY = 0;
+        
+    }
+    
+    function drawRunning(){
+        updateFrame();
+        ctx.drawImage(correndo, srcX, srcY, frameWidth, frameHeight, megaman.x, megaman.y, megaman.width, megaman.height);
+        console.log(cont);
+    }
+    
+    megaman.img.src = "sprites-megaman-x.png";
     
     var controller = {
         up : false,
@@ -54,28 +80,28 @@ $(function(){
     
     //atualização dos elementos do jogo
     function update(){
-        if(controller.up && rectangle.jumping == false) {
-            rectangle.speedY -= 40;
-            rectangle.jumping = true;
+        if(controller.up && megaman.jumping == false) {
+            megaman.speedY -= 50;
+            megaman.jumping = true;
             
         }
         
         if(controller.left)
-            rectangle.speedX -= 0.5;
+            megaman.speedX -= 0.5;
         
         if(controller.right)
-            rectangle.speedX += 0.5;
+            megaman.speedX += 0.5;
         
-        rectangle.speedY += 1.5;
-        rectangle.x += rectangle.speedX;
-        rectangle.y += rectangle.speedY;
-        rectangle.speedY *= 0.9;
-        rectangle.speedX *= 0.9;
+        megaman.speedY += 1.5;
+        megaman.x += megaman.speedX;
+        megaman.y += megaman.speedY;
+        megaman.speedY *= 0.9;
+        megaman.speedX *= 0.9;
         
-        if(rectangle.y > 450) {
-            rectangle.jumping = false;
-            rectangle.y = 450;
-            rectangle.speedY = 0;
+        if(megaman.y > 450) {
+            megaman.jumping = false;
+            megaman.y = 450;
+            megaman.speedY = 0;
         }
     }
     
@@ -85,63 +111,18 @@ $(function(){
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, 1000, 800);
         
-        //desenha retangulo
-        /*ctx.fillStyle = "red";
-        ctx.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);*/
-        
+        //desenha o personagem se estiver pulando ou parado
+        if(megaman.jumping == true)
+            ctx.drawImage(megaman.img, 320, 220, 90, 190, megaman.x, megaman.y, 80, 170);
+        else
+            drawRunning();
+
         //desenha linha
         ctx.fillStyle = "black";
         ctx.fillRect(0, 580, 1000, 7);
         
-        
-        //desenha o personagem se estiver pulando ou parado
-        if(rectangle.jumping == true)
-            ctx.drawImage(character, 320, 220, 90, 190, rectangle.x, rectangle.y, 90, 190);
-        else if(controller.right) {
-            //ctx.drawImage(character, 550, 70, 130, 130, rectangle.x, rectangle.y, 130, 130);
-            window.setTimeout(correr(), 1000);
-        }
-        else
-            ctx.drawImage(character, 550, 70, 140, 130, rectangle.x, rectangle.y, 130, 130);
-        
     }
     
-    function correr() {
-        switch (cont) {
-            case 0:
-                ctx.drawImage(correndo, 0, 0, 130, 145, rectangle.x, rectangle.y, 130, 130);
-                break;
-            case 1:
-                ctx.drawImage(correndo, 130, 0, 85, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-            case 2:
-                ctx.drawImage(correndo, 215, 0, 95, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-                
-            case 3:
-                ctx.drawImage(correndo, 315, 0, 135, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-                
-            case 4:
-                ctx.drawImage(correndo, 470, 0, 90, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-                
-            case 5:
-                ctx.drawImage(correndo, 565, 0, 100, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-            case 6:
-                ctx.drawImage(correndo, 675, 0, 140, 140, rectangle.x, rectangle.y, 130, 130);
-                break;
-        }
-        console.log(cont);
-        cont++;
-        if(cont == 7)
-            cont = 0;
-    }
-    
-    setInterval(function() {
-        //loop();
-    }, 5000);
     //chamando para rodar infinitamente
-    loop();
+   loop();
 });

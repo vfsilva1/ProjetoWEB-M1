@@ -11,6 +11,15 @@ $(function(){
     thwomp.src = "thwomp.png";
     var shell = new Image();
     shell.src = "shell.png";
+    var soundtrack = $("#soundtrack")[0];
+    var gameState = "start";
+    var cont = 100; //gun energy
+    var listaTiros = [];
+    var tiro = new Image();
+    tiro.src = "sprites-megaman-x.png";
+    
+    if(gameState == "start")
+        soundtrack.play();
     
     function Rect (img, x, y, width, height, speedX) {
         this.img = img;
@@ -19,6 +28,7 @@ $(function(){
         this.width = width;
         this.height = height;
         this.speedX = speedX;
+        this.visivel = true;
     }
     Rect.prototype = {
         get bottom() { return this.y + this.height; },
@@ -44,7 +54,9 @@ $(function(){
         speedY : 0,
         jumping : true,
         dashing: false,
-        hp : 3
+        hp : 100,
+        hit : false,
+        shooting : false
     };
     megaman.img.src = "sprites-megaman-x.png";
     
@@ -92,9 +104,12 @@ $(function(){
         }
     }
     
+    
+    
     var controller = {
         up : false,
         d: false,
+        space : false,
         keyListener : function(event) {
             var key_state = (event.type == "keydown")?true:false;
         
@@ -104,6 +119,9 @@ $(function(){
                     break;
                 case 68: // 'd' key (dashing)
                     controller.d = key_state;
+                    break;
+                case 32: //space key (shooting)
+                    controller.space = key_state;
                     break;
             }
             
@@ -115,7 +133,7 @@ $(function(){
         window.requestAnimationFrame(loop, cnv);
         window.addEventListener("keydown", controller.keyListener);
         window.addEventListener("keyup", controller.keyListener);
-        
+        var startTime = new Date().getTime();
         update();
         render();
     }
@@ -125,11 +143,13 @@ $(function(){
         if(controller.up && megaman.jumping == false) {
             megaman.speedY -= 55;
             megaman.jumping = true;
-            
         }
         
         if(controller.d) 
             megaman.dashing = true;
+        
+        if(controller.space)
+            megaman.shooting = true;
         
         megaman.speedY += 1.5;
         
@@ -142,12 +162,31 @@ $(function(){
             megaman.y = 608;
             megaman.speedY = 0;
         }
+        
+        if(megaman.hp <= 0) {
+            gameState = "gameOver";
+        }
+        
+        if(gameState == "gameOver") {
+            soundtrack.pause();
+            clearInterval(interval);
+            $("#canvas").style.visibility = 'hidden';
+        }
+        
+        if(megaman.shooting == true && cont >= 0) {
+            listaTiros.push(new Rect(null, megaman.x + 60, megaman.y + 50, 100, 10, 50));
+            cont--;
+        }
+        var hp = $("#hp")[0];
+        hp.innerHTML  = "HP   : " + megaman.hp;
+        var energy = $("#energy")[0];
+        energy.innerHTML = "Gun Energy : " + cont;
     }
     
     
     var lista = [];
-    var r = new Rect(thwomp, 1300, 650, 100, 100, -10);
     var recMegaman;
+    var recDashing;
     //desenhar elementos do jogo na tela
     function render() {
         //cenario se mexendo
@@ -156,33 +195,18 @@ $(function(){
         geraObstaculos();
         lista.forEach(desenhaObstaculo);
         lista.forEach(moverObstaculo);
+        lista.forEach(colisao);
         
-        
-        recMegaman = new Rect(correndo, megaman.x, megaman.y, megaman.width - 40, megaman.height -10, 0);
-        
+        recMegaman = new Rect(null, megaman.x, megaman.y, megaman.width - 40, megaman.height -10, 0);
+        recDashing = new Rect(null, megaman.x, megaman.y + 50, megaman.width, megaman.height - 50, 0);
 //        ctx.drawImage(r.img, 0, 0, r.img.width, r.img.height, r.x, r.y, r.width, r.height);
 //        r.x += r.speedX;
         
-        //console.log(r.testeColisao(recMegaman));
+        listaTiros.forEach(desenhaTiro);
+        listaTiros.forEach(moverTiro);
+        listaTiros.forEach(colisaoTiroObstaculo);
         
-        
-        
-        //desenha o personagem se estiver pulando ou parado
-        if(megaman.jumping == true)
-            ctx.drawImage(megaman.img, 320, 220, 90, 190, megaman.x, megaman.y, 80, 170);
-        else if(megaman.dashing == true){
-            ctx.drawImage(megaman.img, 1110, 444, 180, 123, megaman.x, megaman.y + 42, 150, 100);
-            megaman.dashing = false;
-        }
-        else {
-            //ctx.fillRect(recMegaman.x, recMegaman.y, recMegaman.width, recMegaman.height);
-            ctx.drawImage(megaman.img, 550, 70, 140, 130, megaman.x, megaman.y, 130, 130);
-
-        }
-            
-        
-        //console.log(megaman.y);
-        //if(recX > megaman.x + 127 && recX < megaman.x + 130)
+        desenharPersonagem();
     }
     
     var x = 0, x2 = 0;
@@ -218,15 +242,61 @@ $(function(){
     }
     
     function desenhaObstaculo(item) {
-        ctx.drawImage(item.img, 0, 0, item.img.width, item.img.height, item.x, item.y, item.width, item.height);
+        if(item.visivel == true)
+            ctx.drawImage(item.img, 0, 0, item.img.width, item.img.height, item.x, item.y, item.width, item.height);
     }
     
     function moverObstaculo(item) {
-        item.x += item.speedX;
-        if(item.testeColisao(recMegaman))
-            item.speedX = 0;
+        if(item.visivel == true)
+            item.x += item.speedX;
     }
     
+    function colisao(item) {
+        if(item.testeColisao(recMegaman) && megaman.dashing == false) {
+            megaman.hp--;
+            megaman.hit = true;
+        }
+        else if(item.testeColisao(recDashing)) {
+            megaman.hp--;
+            megaman.hit = true;
+        }
+            
+    }
+    
+    //var tiro = new Rect(null, megaman.x, megaman.y, 50, 20, 5);
+    function desenharPersonagem () {
+            if(megaman.jumping == true)
+                ctx.drawImage(megaman.img, 320, 220, 90, 190, megaman.x, megaman.y, 80, 170);
+            else if(megaman.dashing == true){
+                ctx.drawImage(megaman.img, 1110, 444, 180, 123, megaman.x, megaman.y + 42, 150, 100);
+                megaman.dashing = false;
+            }
+            else if(megaman.shooting == true){
+                ctx.drawImage(megaman.img, 842, 56, 124, 149, megaman.x, megaman.y - 17, 120, 150);
+                megaman.shooting = false;
+            }
+            else {
+                //ctx.fillRect(recMegaman.x, recMegaman.y, recMegaman.width, recMegaman.height);
+                ctx.drawImage(megaman.img, 550, 70, 140, 130, megaman.x, megaman.y, 130, 130);
+                //drawRunning();
+            }
+    }
+    
+    function desenhaTiro(item) {
+        ctx.drawImage(tiro, 250, 10, 50, 200, item.x, item.y, item.width, item.height);
+        //ctx.fillRect(item.x, item.y, item.width, item.height);
+    }
+    
+    function moverTiro(item) {
+        item.x += item.speedX;
+    }
+    
+    function colisaoTiroObstaculo(item) {
+        for(var i = 0; i < lista.length; i++) {
+            if(item.testeColisao(lista[i]))
+                lista[i].visivel = false;
+        }  
+    }
     
     //chamando para rodar infinitamente
     loop();

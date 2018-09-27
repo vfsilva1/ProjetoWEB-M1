@@ -1,6 +1,11 @@
+@import url('https://fonts.googleapis.com/css?family=Arvo');
 #canvas {
     margin: 0 auto;
     width: 1000px;
-    height: 800px;
+    height: 770px;
     border: 1px solid;
+}
+
+#hp, #energy {
+    font-family: Arvo;
 }

@@ -12,11 +12,15 @@
     </head>
     <body>
         <div id="canvas">
-            <canvas width="1000px" height="800px"></canvas>
+            <canvas width="1000px" height="800px">
+                <h2 style="float: left">alo</h2>
+            </canvas>
         </div>
-        <audio class="my_audio" >
-            <source src="stormEagle.mp3" type="audio/mpeg">
-            <source src="stormEagle.mp3" type="audio/ogg">
-        </audio>
+        <audio id="soundtrack" src="stormEagle.mp3"></audio>
+        <div>
+            <h1 id="hp" style="color: red; text-align: center;"></h1> 
+            <h1 id="energy" style="color: blue; text-align: center;"></h1>
+        </div>
+        
     </body>
 </html>

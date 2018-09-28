@@ -1,4 +1,4 @@
-$(function(){
+﻿$(function(){
     var cnv = $('canvas')[0];
     var ctx = cnv.getContext('2d');
     var cenario = new Image();
@@ -108,6 +108,8 @@ $(function(){
     
     var controller = {
         up : false,
+	right: false,
+	left: false,
         d: false,
         space : false,
         keyListener : function(event) {
@@ -123,6 +125,12 @@ $(function(){
                 case 32: //space key (shooting)
                     controller.space = key_state;
                     break;
+		case 39:
+		    controller.right = key_state;
+		    break;
+		case 37:
+		    controller.left = key_state;
+		    break;
             }
             
         }
@@ -150,12 +158,20 @@ $(function(){
         
         if(controller.space)
             megaman.shooting = true;
-        
+
+	if(controller.right) {
+	   megaman.speedX = 5;
+	   megaman.x += megaman.speedX;
+	}
+	if(controller.left) {
+	   megaman.speedX = -5;
+      	   megaman.x += megaman.speedX;
+	}
         megaman.speedY += 1.5;
         
         megaman.y += megaman.speedY;
         megaman.speedY *= 0.9;
-        megaman.speedX *= 0.9;
+        //megaman.speedX *= 0.9;
         
         if(megaman.y > 608) {
             megaman.jumping = false;
@@ -169,6 +185,7 @@ $(function(){
         
         if(gameState == "gameOver") {
             soundtrack.pause();
+			window.location.href = "telaGameOver.html";
             clearInterval(interval);
             $("#canvas").style.visibility = 'hidden';
         }
@@ -252,14 +269,15 @@ $(function(){
     }
     
     function colisao(item) {
-        if(item.testeColisao(recMegaman) && megaman.dashing == false) {
+        if(item.testeColisao(recMegaman) && megaman.dashing == false && item.visivel == true) {
             megaman.hp--;
             megaman.hit = true;
         }
-        else if(item.testeColisao(recDashing)) {
+        else if(item.testeColisao(recDashing) && controller.right == false && item.visivel == true) {
             megaman.hp--;
             megaman.hit = true;
         }
+	
             
     }
     

@@ -1,0 +1,44 @@
+#menuGameOver ul {
+    padding:0px;
+    margin:0px;
+    background-color:#EDEDED;
+    list-style:none;
+    text-align: center;
+    font-weight: bold;
+}
+
+#menuGameOver ul li { display: inline; }
+
+#menuGameOver ul li a {
+    padding: 15px 30px;
+    display: inline-block;
+
+    background-color: rgb(255, 100, 30);
+    color: #333;
+    text-decoration: none;
+    border-bottom:5px solid black;
+}
+#imagem {
+	margin: 0 auto;
+	//border: 1px solid;
+	width: 350px;
+	height: 350px;
+	
+}
+
+#menuGameOver ul li a:hover {
+    background-color:rgb(255, 0, 0);
+    color: #6D6D6D;
+    border-bottom: 5px solid black; 
+    color: white;
+}
+
+#corpo {
+	background-color: #ff8989;
+}
+
+.footer {
+    position:absolute;
+    bottom:0;
+    width:100%;
+}
